@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: jnlp 
+    image: jenkins/jnlp-slave:3.35-5-alpine
+  - name: maven
+    image: maven:3.6.0-jdk-8-alpine
+    tty: true
+    command:
+      - cat
+    volumeMounts:
+    - mountPath: /root/workspace
+      name: vol-workspace
+    - mountPath: /root/.m2
+      name: vol-m2
+  - name: ant
+    image: accordion/ant
+    tty: true
+    command:
+      - cat
+    volumeMounts:
+    - mountPath: /root/workspace
+      name: vol-workspace
+  - name: docker
+    image: docker:18.06.3-ce
+    tty: true
+    command:
+      - cat
+    volumeMounts:
+    - mountPath: /root/workspace
+      name: vol-workspace
+    - mountPath: /var/run/docker.sock
+      name: vol-docker-sock
+  volumes:
+  - name: vol-docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+  - name: vol-m2
+    nfs:
+      path: /nfs/data/jenkins/.m2
+      server: 10.20.200.201
+  - name: vol-workspace
+    nfs:
+      path: /nfs/data/jenkins/workspace
+      server: 10.20.200.201

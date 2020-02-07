@@ -1,0 +1,16 @@
+FROM busybox:latest
+MAINTAINER bskim <bskim@mantech.co.kr>
+LABEL type="accordion-tomcat"
+
+#Make Dirctroy
+RUN mkdir /deploy \ 
+    && mkdir /config \
+    && mkdir /lib
+
+ADD deployment /deployment
+
+ADD accordion-tomcat-runner.sh /
+
+RUN chmod 755 accordion-tomcat-runner.sh
+
+CMD ["/accordion-tomcat-runner.sh"]

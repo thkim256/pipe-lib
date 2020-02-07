@@ -1,0 +1,5 @@
+FROM node:carbon
+COPY package*.json ./
+RUN npm install\nCOPY . .
+EXPOSE 8080
+CMD ["npm", "start"]
