@@ -1,5 +1,5 @@
 FROM busybox:latest
-MAINTAINER bskim <bskim@mantech.co.kr>
+MAINTAINER accordion <accordion@accordions.co.kr>
 LABEL type="accordion-wildfly"
 
 #Make Dirctroy
