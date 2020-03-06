@@ -417,12 +417,24 @@ def stageDockerPush(def stageName = "Docker Push", def containerName = "docker")
 
 def stageDeploy(def stageName = "Deploy", def containerName = "") {
     log.info "call"
+    def projectName = this.originConfig.deploy.project.name
+    def appName = this.originConfig.deploy.app.name
+    def appType = getFolderName()
 
     lock {
         stage(stageName, containerName) {
-            echo httpUtil.post(url: "$ACCORDION_URL/ajax/jenkins/deploy/$BUILD_NUMBER", body: "${ObjectUtil.toJson(this.originConfig)}")
+            echo httpUtil.post(
+                url: "$ACCORDION_URL/api/v1/projects/${projectName}/${appType}s/${appName}/$BUILD_NUMBER/deploy",
+                headers: ["Authorization": "Bearer $ACCORDION_TOKEN"],
+                body: "${ObjectUtil.toJson(this.originConfig)}"
+            )
         }
     }
+}
+
+def getFolderName() {
+    def array = pwd().split("/")
+    return array[array.length - 2];
 }
 
 return this
