@@ -159,7 +159,7 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
 
         } else if (source.type == 'UPLOAD') {
             def url = "$ACCORDION_URL/api/v1/projects/${projectName}/apps/${appName}/storage/${source.file}"
-            def downloadShell = "wget --header='Authorization: Bearer ${ACCORDION_TOKEN}' ${url}"
+            def downloadShell = "set +x; wget --header='Authorization: Bearer ${ACCORDION_TOKEN}' ${url}"
 
             if (ObjectUtil.isFileType(source.file, 'zip')) {
                 closure = {
