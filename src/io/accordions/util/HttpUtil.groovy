@@ -38,12 +38,16 @@ def post(params = [:]) {
     try {
         def url = params.url
         def body = params.body
+        def headers = params.headers ?: []
         def contentType = ObjectUtil.safeValue(params.contentType, "application/json")
 
         conn = new URL("${url}").openConnection() as HttpURLConnection
         conn.setRequestMethod('POST')
         conn.setDoOutput(true)
         conn.setRequestProperty("Content-Type", contentType as String)
+        for (header in headers) {
+            conn.setRequestProperty("${header.key}", "${header.value}")
+        }
 
         def bodyWriter = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()))
         bodyWriter.write(body)

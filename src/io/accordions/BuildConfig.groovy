@@ -20,6 +20,7 @@ class Deploy {
     def type
     class App {
         def name
+        def type
     }
 
     class Project {

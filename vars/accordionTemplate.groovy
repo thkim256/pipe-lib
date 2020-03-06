@@ -158,28 +158,28 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
             }
 
         } else if (source.type == 'UPLOAD') {
+            def url = "$ACCORDION_URL/api/v1/projects/${projectName}/apps/${appName}/storage/${source.file}"
+            def downloadShell = "wget --header='Authorization: Bearer ${ACCORDION_TOKEN}' ${url}"
+
             if (ObjectUtil.isFileType(source.file, 'zip')) {
                 closure = {
-                    sh "wget $ACCORDION_URL/ajax/jenkins/file/${projectName}_${appName}"
-                    sh "mv ${projectName}_${appName} ${projectName}_${appName}.zip"
-                    sh "unzip ${projectName}_${appName}.zip -d ./"
+                    sh "${downloadShell}"
+                    sh "unzip ${source.file} -d ./"
                     sh "ls -al"
-                    sh "rm -rf ${projectName}_${appName}.zip"
+                    sh "rm -rf ${source.file}"
                     sh "ls -al"
                 }
             } else if (ObjectUtil.isFileType(source.file, 'tar')) {
                 closure = {
-                    sh "wget $ACCORDION_URL/ajax/jenkins/file/${projectName}_${appName}"
-                    sh "mv ${projectName}_${appName} ${projectName}_${appName}.tar"
+                    sh "${downloadShell}"
                     sh "ls -al"
-                    sh "tar -xvf ${projectName}_${appName}.tar"
-                    sh "rm -rf ${projectName}_${appName}.tar"
+                    sh "tar -xvf ${source.file}"
+                    sh "rm -rf ${source.file}"
                     sh "ls -al"
                 }
             } else if (ObjectUtil.isFileType(source.file, 'war')) {
                 closure = {
-                    sh "wget $ACCORDION_URL/ajax/jenkins/file/${projectName}_${appName}"
-                    sh "mv ${projectName}_${appName} ${source.file}"
+                    sh "${downloadShell}"
                 }
             } else {
                 def msg = "Upload File Format not support"
