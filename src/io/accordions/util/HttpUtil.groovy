@@ -38,7 +38,7 @@ def post(params = [:]) {
     try {
         def url = params.url
         def body = params.body
-        def headers = params.headers ?: []
+        def headers = params.headers ?: [:]
         def contentType = ObjectUtil.safeValue(params.contentType, "application/json")
 
         conn = new URL("${url}").openConnection() as HttpURLConnection

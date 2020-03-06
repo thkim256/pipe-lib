@@ -101,7 +101,7 @@ def stage(def stageName, def containerName, Closure closure) {
         }
     } else {
         if (hasContainerName) {
-            log.warning "container setting ignored (stageName: ${stageName}, containerName: ${containerName})"
+            log.debug "container setting ignored (stageName: ${stageName}, containerName: ${containerName})"
         }
         stage(stageName) {
             closure.call()
