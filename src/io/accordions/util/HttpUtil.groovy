@@ -5,12 +5,16 @@ import io.accordions.logger.Logger
 
 @Field Logger log = new Logger()
 
-def get(url) {
+def get(params = [:]) {
     def charset = "UTF-8"
     def conn = null
+    def headers = params.headers ?: [:]
     try {
-        conn = new URL("${url}").openConnection() as HttpURLConnection
+        conn = new URL("${params.url}").openConnection() as HttpURLConnection
         conn.setRequestMethod('GET')
+        for (header in headers) {
+            conn.setRequestProperty("${header.key}", "${header.value}")
+        }
         conn.connect()
 
         log.debug "responseCode: ${conn.responseCode}, responseMessage: ${conn.responseMessage}"
