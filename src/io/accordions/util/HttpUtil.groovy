@@ -3,6 +3,7 @@ package io.accordions.util
 import groovy.transform.Field
 import io.accordions.logger.Logger
 
+import com.cloudbees.groovy.cps.NonCPS
 import javax.net.ssl.*
 import java.security.SecureRandom
 import java.security.cert.CertificateException
