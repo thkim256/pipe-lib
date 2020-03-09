@@ -10,6 +10,7 @@ import java.security.cert.X509Certificate
 
 @Field Logger log = new Logger()
 
+@NonCPS
 @Field TrustManager[] trustAllCerts = [
         new X509TrustManager() {
             X509Certificate[] getAcceptedIssuers() {
@@ -24,6 +25,7 @@ import java.security.cert.X509Certificate
         }
 ] as TrustManager[]
 
+@NonCPS
 @Field HostnameVerifier allHostsValid = new HostnameVerifier() {
     @Override
     boolean verify(String hostname, SSLSession session) {
