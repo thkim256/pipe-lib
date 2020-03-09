@@ -24,9 +24,13 @@ def call() {
           }
         };
 
+    TrustManager[] trustAllCerts = new TrustManager[1];
+    trustAllCerts[0] = trustManager;
+
     // Install the all-trusting trust manager
     SSLContext sc = SSLContext.getInstance("SSL");
-    sc.init(null, new TrustManager[] {trustManager}, new java.security.SecureRandom());
+    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
     HostnameVerifier allHostsValid =
