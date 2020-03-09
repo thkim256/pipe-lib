@@ -31,26 +31,27 @@ import java.security.cert.X509Certificate
     }
 }
 
+@NonCPS
 HttpURLConnection getURLConnection(url) {
-//    def nullTrustManager = [
-//            checkClientTrusted: { chain, authType -> },
-//            checkServerTrusted: { chain, authType -> },
-//            getAcceptedIssuers: { null }
-//    ]
-//
-//    def nullHostnameVerifier = [
-//            verify: { hostname, session -> true }
-//    ]
-//
-//    SSLContext sc = SSLContext.getInstance("SSL")
-//    sc.init(null, [nullTrustManager as X509TrustManager] as TrustManager[], null)
-//    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-//    HttpsURLConnection.setDefaultHostnameVerifier(nullHostnameVerifier as HostnameVerifier)
+    def nullTrustManager = [
+            checkClientTrusted: { chain, authType -> },
+            checkServerTrusted: { chain, authType -> },
+            getAcceptedIssuers: { null }
+    ]
+
+    def nullHostnameVerifier = [
+            verify: { hostname, session -> true }
+    ]
 
     SSLContext sc = SSLContext.getInstance("SSL")
-    sc.init(null, trustAllCerts, new SecureRandom())
+    sc.init(null, [nullTrustManager as X509TrustManager] as TrustManager[], null)
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
+    HttpsURLConnection.setDefaultHostnameVerifier(nullHostnameVerifier as HostnameVerifier)
+
+    //SSLContext sc = SSLContext.getInstance("SSL")
+    //sc.init(null, trustAllCerts, new SecureRandom())
+    //HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+    //HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
     return new URL("${url}").openConnection() as HttpURLConnection
 }
 
