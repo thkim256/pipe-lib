@@ -4,35 +4,11 @@ import groovy.transform.Field
 import io.accordions.logger.Logger
 
 import javax.net.ssl.*
-import java.security.SecureRandom
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
 
 @Field Logger log = new Logger()
 
-@Field TrustManager[] trustAllCerts = [
-        new X509TrustManager() {
-            X509Certificate[] getAcceptedIssuers() {
-                return null
-            }
-
-            void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
-            }
-
-            void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
-            }
-        }
-] as TrustManager[]
-
-@Field HostnameVerifier allHostsValid = new HostnameVerifier() {
-    @Override
-    boolean verify(String hostname, SSLSession session) {
-        return true
-    }
-}
-
 @NonCPS
-HttpURLConnection getURLConnection(url) {
+static HttpURLConnection getURLConnection(url) {
     def nullTrustManager = [
             checkClientTrusted: { chain, authType -> },
             checkServerTrusted: { chain, authType -> },
@@ -47,11 +23,6 @@ HttpURLConnection getURLConnection(url) {
     sc.init(null, [nullTrustManager as X509TrustManager] as TrustManager[], null)
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
     HttpsURLConnection.setDefaultHostnameVerifier(nullHostnameVerifier as HostnameVerifier)
-
-    //SSLContext sc = SSLContext.getInstance("SSL")
-    //sc.init(null, trustAllCerts, new SecureRandom())
-    //HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-    //HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
     return new URL("${url}").openConnection() as HttpURLConnection
 }
 
@@ -62,21 +33,7 @@ def get(params = [:]) {
         def url = params.url
         def headers = params.headers ?: [:]
 
-//        def nullTrustManager = [
-//                checkClientTrusted: { chain, authType -> },
-//                checkServerTrusted: { chain, authType -> },
-//                getAcceptedIssuers: { null }
-//        ]
-//
-//        def nullHostnameVerifier = [
-//                verify: { hostname, session -> true }
-//        ]
-//
-//        SSLContext sc = SSLContext.getInstance("SSL")
-//        sc.init(null, [nullTrustManager as X509TrustManager] as TrustManager[], null)
-//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-//        HttpsURLConnection.setDefaultHostnameVerifier(nullHostnameVerifier as HostnameVerifier)
-//        conn = new URL("${url}").openConnection() as HttpURLConnection
+        log.debug "params: ${params}"
 
         conn = getURLConnection(url)
         conn.setRequestMethod('GET')
