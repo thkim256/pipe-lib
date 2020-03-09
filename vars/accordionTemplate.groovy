@@ -424,7 +424,7 @@ def stageDeploy(def stageName = "Deploy", def containerName = "") {
     lock {
         stage(stageName, containerName) {
             echo httpUtil.post(
-                url: "$ACCORDION_URL/projects/${projectName}/${appType}s/${appName}/$BUILD_NUMBER/deploy",
+                url: "$ACCORDION_URL/projects/${projectName}/${appType}s/${appName}/builds/$BUILD_NUMBER/deploy",
                 headers: ["Authorization": " Bearer $ACCORDION_TOKEN"],
                 body: "${ObjectUtil.toJson(this.originConfig)}"
             )
