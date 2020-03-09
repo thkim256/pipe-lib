@@ -3,6 +3,8 @@ package io.accordions.util
 import groovy.transform.Field
 import io.accordions.logger.Logger
 
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
 import java.security.SecureRandom
 import java.security.cert.CertificateException
@@ -32,6 +34,7 @@ def call() {
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
     def allHostsValid = new HostnameVerifier() {
+        @Override
         boolean verify(String hostname, SSLSession session) {
             return true
         }
