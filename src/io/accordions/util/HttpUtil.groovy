@@ -12,25 +12,21 @@ import java.security.cert.X509Certificate
 
 def call() {
     TrustManager trustManager =
-            new X509TrustManager() {
-                @Override
-                void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
+        new X509TrustManager() {
+          public void checkClientTrusted(X509Certificate[] chain, String authType)
+              throws CertificateException {}
 
-                @Override
-                void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
+          public void checkServerTrusted(X509Certificate[] chain, String authType)
+              throws CertificateException {}
 
-                X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-            } as TrustManager
-    TrustManager[] trustAllCerts = new TrustManager[1]
-    trustAllCerts[0] = trustManager
+          public X509Certificate[] getAcceptedIssuers() {
+            return null;
+          }
+        };
 
     // Install the all-trusting trust manager
-    SSLContext sc = SSLContext.getInstance("SSL")
-    sc.init(null, trustAllCerts, new SecureRandom())
+    SSLContext sc = SSLContext.getInstance("SSL");
+    sc.init(null, new TrustManager[] {trustManager}, new java.security.SecureRandom());
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
     HostnameVerifier allHostsValid =
