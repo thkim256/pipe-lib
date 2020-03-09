@@ -25,6 +25,9 @@ def get(params = [:]) {
         }
     } catch (Exception e) {
         log.error e.getMessage()
+        if (log.isDebugEnabled()) {
+            e.printStackTrace()
+        }
         throw e
     } finally {
         if (conn != null) {
@@ -41,9 +44,11 @@ def post(params = [:]) {
     def conn = null
     try {
         def url = params.url
-        def body = params.body
+        def body = params.body ?: ""
         def headers = params.headers ?: [:]
         def contentType = ObjectUtil.safeValue(params.contentType, "application/json")
+
+        log.debug "params: ${params}"
 
         conn = new URL("${url}").openConnection() as HttpURLConnection
         conn.setRequestMethod('POST')
@@ -65,6 +70,9 @@ def post(params = [:]) {
         }
     } catch (Exception e) {
         log.error e.getMessage()
+        if (log.isDebugEnabled()) {
+            e.printStackTrace()
+        }
         throw e
     } finally {
         if (conn != null) {
