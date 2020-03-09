@@ -158,7 +158,7 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
             }
 
         } else if (source.type == 'UPLOAD') {
-            def url = "$ACCORDION_URL/api/v1/projects/${projectName}/apps/${appName}/storage/${source.file}"
+            def url = "$ACCORDION_URL/projects/${projectName}/apps/${appName}/storage/${source.file}"
             def downloadShell = "set +x; wget --header='Authorization: Bearer ${ACCORDION_TOKEN}' ${url} -o /dev/null"
 
             if (ObjectUtil.isFileType(source.file, 'zip')) {
@@ -424,8 +424,8 @@ def stageDeploy(def stageName = "Deploy", def containerName = "") {
     lock {
         stage(stageName, containerName) {
             echo httpUtil.post(
-                url: "$ACCORDION_URL/api/v1/projects/${projectName}/${appType}s/${appName}/$BUILD_NUMBER/deploy",
-                headers: ["Authorization": "Bearer $ACCORDION_TOKEN"],
+                url: "$ACCORDION_URL/projects/${projectName}/${appType}s/${appName}/$BUILD_NUMBER/deploy",
+                headers: ["Authorization": " Bearer $ACCORDION_TOKEN"],
                 body: "${ObjectUtil.toJson(this.originConfig)}"
             )
         }

@@ -3,14 +3,39 @@ package io.accordions.util
 import groovy.transform.Field
 import io.accordions.logger.Logger
 
+import javax.net.ssl.*
+
 @Field Logger log = new Logger()
+
+@NonCPS
+static HttpURLConnection getURLConnection(url) {
+    def nullTrustManager = [
+            checkClientTrusted: { chain, authType -> },
+            checkServerTrusted: { chain, authType -> },
+            getAcceptedIssuers: { null }
+    ]
+
+    def nullHostnameVerifier = [
+            verify: { hostname, session -> true }
+    ]
+
+    SSLContext sc = SSLContext.getInstance("SSL")
+    sc.init(null, [nullTrustManager as X509TrustManager] as TrustManager[], null)
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+    HttpsURLConnection.setDefaultHostnameVerifier(nullHostnameVerifier as HostnameVerifier)
+    return new URL("${url}").openConnection() as HttpURLConnection
+}
 
 def get(params = [:]) {
     def charset = "UTF-8"
     def conn = null
-    def headers = params.headers ?: [:]
     try {
-        conn = new URL("${params.url}").openConnection() as HttpURLConnection
+        def url = params.url
+        def headers = params.headers ?: [:]
+
+        log.debug "params: ${params}"
+
+        conn = getURLConnection(url)
         conn.setRequestMethod('GET')
         for (header in headers) {
             conn.setRequestProperty("${header.key}", "${header.value}")
@@ -50,7 +75,7 @@ def post(params = [:]) {
 
         log.debug "params: ${params}"
 
-        conn = new URL("${url}").openConnection() as HttpURLConnection
+        conn = getURLConnection(url)
         conn.setRequestMethod('POST')
         conn.setDoOutput(true)
         conn.setRequestProperty("Content-Type", contentType as String)
