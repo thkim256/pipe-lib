@@ -3,7 +3,6 @@ package io.accordions.util
 import groovy.transform.Field
 import io.accordions.logger.Logger
 
-import com.cloudbees.groovy.cps.NonCPS
 import javax.net.ssl.*
 import java.security.SecureRandom
 import java.security.cert.CertificateException
@@ -11,7 +10,6 @@ import java.security.cert.X509Certificate
 
 @Field Logger log = new Logger()
 
-@NonCPS
 @Field TrustManager[] trustAllCerts = [
         new X509TrustManager() {
             X509Certificate[] getAcceptedIssuers() {
@@ -26,7 +24,6 @@ import java.security.cert.X509Certificate
         }
 ] as TrustManager[]
 
-@NonCPS
 @Field HostnameVerifier allHostsValid = new HostnameVerifier() {
     @Override
     boolean verify(String hostname, SSLSession session) {
