@@ -3,7 +3,44 @@ package io.accordions.util
 import groovy.transform.Field
 import io.accordions.logger.Logger
 
+import javax.net.ssl.X509TrustManager
+import java.security.SecureRandom
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
+
 @Field Logger log = new Logger()
+
+def call() {
+    TrustManager trustManager =
+            new X509TrustManager() {
+                @Override
+                void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+            } as TrustManager
+    TrustManager[] trustAllCerts = new TrustManager[1]
+    trustAllCerts[0] = trustManager
+
+    // Install the all-trusting trust manager
+    SSLContext sc = SSLContext.getInstance("SSL")
+    sc.init(null, trustAllCerts, new SecureRandom())
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+    HostnameVerifier allHostsValid =
+            new HostnameVerifier() {
+                boolean verify(String hostname, SSLSession session) {
+                    return true
+                }
+            }
+    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
+}
 
 def get(params = [:]) {
     def charset = "UTF-8"
