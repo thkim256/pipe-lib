@@ -12,14 +12,14 @@ import java.security.cert.X509Certificate
 
 @Field TrustManager[] trustAllCerts = [
         new X509TrustManager() {
-            public X509Certificate[] getAcceptedIssuers() {
+            X509Certificate[] getAcceptedIssuers() {
                 return null
             }
 
-            public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+            void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
             }
 
-            public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+            void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
             }
         }
 ] as TrustManager[]
@@ -31,16 +31,21 @@ import java.security.cert.X509Certificate
     }
 }
 
+HttpURLConnection getURLConnection(url) {
+    SSLContext sc = SSLContext.getInstance("SSL")
+    sc.init(null, trustAllCerts, new SecureRandom())
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
+    return new URL("${url}").openConnection() as HttpURLConnection
+}
+
 def get(params = [:]) {
     def charset = "UTF-8"
     def conn = null
-    def headers = params.headers ?: [:]
     try {
-        SSLContext sc = SSLContext.getInstance("SSL")
-        sc.init(null, trustAllCerts, new SecureRandom())
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
-        conn = new URL("${params.url}").openConnection() as HttpURLConnection
+        def url = params.url
+        def headers = params.headers ?: [:]
+        conn = getURLConnection(url)
         conn.setRequestMethod('GET')
         for (header in headers) {
             conn.setRequestProperty("${header.key}", "${header.value}")
@@ -80,7 +85,7 @@ def post(params = [:]) {
 
         log.debug "params: ${params}"
 
-        conn = new URL("${url}").openConnection() as HttpURLConnection
+        conn = getURLConnection(url)
         conn.setRequestMethod('POST')
         conn.setDoOutput(true)
         conn.setRequestProperty("Content-Type", contentType as String)
