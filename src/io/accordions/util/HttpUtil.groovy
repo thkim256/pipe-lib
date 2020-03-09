@@ -11,34 +11,31 @@ import java.security.cert.X509Certificate
 @Field Logger log = new Logger()
 
 def call() {
-    TrustManager trustManager =
-        new X509TrustManager() {
-          public void checkClientTrusted(X509Certificate[] chain, String authType)
-              throws CertificateException {}
+    def trustAllCerts = [
+            new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null
+                }
 
-          public void checkServerTrusted(X509Certificate[] chain, String authType)
-              throws CertificateException {}
+                public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                }
 
-          public X509Certificate[] getAcceptedIssuers() {
-            return null;
-          }
-        };
-
-    TrustManager[] trustAllCerts = new TrustManager[1];
-    trustAllCerts[0] = trustManager;
+                public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                }
+            }
+    ] as TrustManager[]
 
     // Install the all-trusting trust manager
     SSLContext sc = SSLContext.getInstance("SSL");
-    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+    sc.init(null, trustAllCerts, new SecureRandom());
 
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
-    HostnameVerifier allHostsValid =
-            new HostnameVerifier() {
-                boolean verify(String hostname, SSLSession session) {
-                    return true
-                }
-            }
+    def allHostsValid = new HostnameVerifier() {
+        boolean verify(String hostname, SSLSession session) {
+            return true
+        }
+    }
     HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
 }
 
