@@ -90,7 +90,6 @@ def post(params = [:]) {
             throw new Exception(conn.errorStream.getText(charset))
         }
     } catch (Exception e) {
-        log.error e.getMessage()
         if (log.isDebugEnabled()) {
             e.printStackTrace()
         }
