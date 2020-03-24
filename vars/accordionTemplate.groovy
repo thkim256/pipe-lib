@@ -125,7 +125,7 @@ def checkoutGitSource(def param = [:]) {
                                                    url          : "${url}"]]])
 }
 
-def checkSvnSource(def param = [:]) {
+def checkoutSvnSource(def param = [:]) {
     def url = param.url
     def dir = param.dir ?: "."
     def credential = param.credential ?: ""
@@ -176,22 +176,13 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
                 checkoutGitSource(args)
             }
         } else if (source.type == 'SVN') {
+            def args = [:]
+            args.url = source.url
+            if (ObjectUtil.nonEmpty(source.credential)) {
+                args.credential = source.credential
+            }
             closure = {
-                checkout([$class                : 'SubversionSCM',
-                          additionalCredentials : [],
-                          excludedCommitMessages: '',
-                          excludedRegions       : '',
-                          excludedRevprop       : '',
-                          excludedUsers         : '',
-                          filterChangelog       : false,
-                          ignoreDirPropChanges  : false,
-                          includedRegions       : '',
-                          locations             : [[credentialsId        : "${ObjectUtil.safeValue(source.credential)}",
-                                                    depthOption          : 'infinity',
-                                                    ignoreExternalsOption: true,
-                                                    local                : '.',
-                                                    remote               : "${source.url}"]],
-                          workspaceUpdater      : [$class: 'UpdateUpdater']])
+                checkoutSvnSource(args)
             }
 
         } else if (source.type == 'UPLOAD') {
