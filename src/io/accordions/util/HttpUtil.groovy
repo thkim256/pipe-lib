@@ -33,8 +33,6 @@ def get(params = [:]) {
         def url = params.url
         def headers = params.headers ?: [:]
 
-        log.debug "params: ${params}"
-
         conn = getURLConnection(url)
         conn.setRequestMethod('GET')
         for (header in headers) {
@@ -42,7 +40,7 @@ def get(params = [:]) {
         }
         conn.connect()
 
-        log.debug "responseCode: ${conn.responseCode}, responseMessage: ${conn.responseMessage}"
+        log.debug "Response - status: ${conn.responseCode}, message: ${conn.responseMessage}"
         if (conn.responseCode == HttpURLConnection.HTTP_OK) {
             return conn.inputStream.getText(charset)
         } else {
@@ -73,8 +71,6 @@ def post(params = [:]) {
         def headers = params.headers ?: [:]
         def contentType = ObjectUtil.safeValue(params.contentType, "application/json")
 
-        log.debug "params: ${params}"
-
         conn = getURLConnection(url)
         conn.setRequestMethod('POST')
         conn.setDoOutput(true)
@@ -87,7 +83,7 @@ def post(params = [:]) {
         bodyWriter.write(body)
         bodyWriter.close()
 
-        log.debug "responseCode: ${conn.responseCode}, responseMessage: ${conn.responseMessage}"
+        log.debug "Response - status: ${conn.responseCode}, message: ${conn.responseMessage}"
         if (conn.responseCode == HttpURLConnection.HTTP_OK) {
             return conn.inputStream.getText(charset)
         } else {

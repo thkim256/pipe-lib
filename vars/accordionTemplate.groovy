@@ -109,6 +109,43 @@ def stage(def stageName, def containerName, Closure closure) {
     }
 }
 
+def checkoutGitSource(def param = [:]) {
+    def url = param.url
+    def branch = param.branch ?: "master"
+    def dir = param.dir ?: "."
+    def credential = param.credential ?: ""
+    checkout([$class                           : 'GitSCM',
+              branches                         : [[name: "${branch}"]],
+              doGenerateSubmoduleConfigurations: false,
+              extensions                       : [],
+              submoduleCfg                     : [],
+              extensions                       : [[$class           : 'RelativeTargetDirectory',
+                                                   relativeTargetDir: "${dir}"]],
+              userRemoteConfigs                : [[credentialsId: "${credential}",
+                                                   url          : "${url}"]]])
+}
+
+def checkSvnSource(def param = [:]) {
+    def url = param.url
+    def dir = param.dir ?: "."
+    def credential = param.credential ?: ""
+    checkout([$class                : 'SubversionSCM',
+              additionalCredentials : [],
+              excludedCommitMessages: '',
+              excludedRegions       : '',
+              excludedRevprop       : '',
+              excludedUsers         : '',
+              filterChangelog       : false,
+              ignoreDirPropChanges  : false,
+              includedRegions       : '',
+              locations             : [[credentialsId        : "${credential}",
+                                        depthOption          : 'infinity',
+                                        ignoreExternalsOption: true,
+                                        local                : "${dir}",
+                                        remote               : "${url}"]],
+              workspaceUpdater      : [$class: 'UpdateUpdater']])
+}
+
 def stageGetSource(def stageName = "Get Source", def containerName = "") {
     log.info "call"
 
@@ -132,11 +169,11 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
                 args.branch = source.ref
             }
             if (ObjectUtil.nonEmpty(source.credential)) {
-                args.credentialsId = source.credential
+                args.credential = source.credential
             }
 
             closure = {
-                git args
+                checkoutGitSource(args)
             }
         } else if (source.type == 'SVN') {
             closure = {
@@ -411,9 +448,9 @@ def stageDeploy(def stageName = "Deploy", def containerName = "") {
     lock {
         stage(stageName, containerName) {
             echo httpUtil.post(
-                url: "$ACCORDION_URL/projects/${projectName}/${appType}s/${appName}/builds/$BUILD_NUMBER/deploy",
-                headers: ["Authorization": " Bearer $ACCORDION_TOKEN"],
-                body: "${ObjectUtil.toJson(this.originConfig)}"
+                    url: "$ACCORDION_URL/projects/${projectName}/${appType}s/${appName}/builds/$BUILD_NUMBER/deploy",
+                    headers: ["Authorization": " Bearer $ACCORDION_TOKEN"],
+                    body: "${ObjectUtil.toJson(this.originConfig)}"
             )
         }
     }
