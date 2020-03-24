@@ -159,7 +159,7 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
 
         } else if (source.type == 'UPLOAD') {
             def url = "$ACCORDION_URL/projects/${projectName}/apps/${appName}/storage/${source.file}"
-            def downloadShell = "set +x; wget --header='Authorization: Bearer ${ACCORDION_TOKEN}' ${url} -o /dev/null"
+            def downloadShell = "set +x; wget --header='Authorization: Bearer ${ACCORDION_TOKEN}' ${url}"
 
             if (ObjectUtil.isFileType(source.file, 'zip')) {
                 closure = {
@@ -207,46 +207,33 @@ def stageSourceBuild(def stageName = "", def containerName = "") {
 
     def _stageName
     def _containerName
-    Closure closure
+    def cmd
     if (fileExists("./pom-accordion.xml")) {
-        log.debug "pom-accordion.xml file exists"
-
         _stageName = 'Build a Maven project'
         _containerName = 'maven'
-        closure = {
-            sh 'mvn -f pom-accordion.xml clean package'
-        }
+        cmd = "mvn -f pom-accordion.xml clean package"
     } else if (fileExists("./pom.xml")) {
-        log.debug "pom.xml file exists"
-
         _stageName = 'Build a Maven project'
         _containerName = 'maven'
-        closure = {
-            sh 'mvn clean package'
-        }
+        cmd = "mvn clean package"
     } else if (fileExists("./build-accordion.xml")) {
-        log.debug "build-accordion.xml file exists"
-
         _stageName = 'Build a Ant project'
         _containerName = 'ant'
-        closure = {
-            sh 'ant -f build-accordion.xml'
-        }
+        cmd = "ant -f build-accordion.xml"
     } else if (fileExists("./build.xml")) {
-        log.debug "build.xml file exists"
-
         _stageName = 'Build a Ant project'
         _containerName = 'ant'
-        closure = {
-            sh 'ant -f build.xml'
-        }
+        cmd = "ant -f build.xml"
     } else {
         log.warning "Not support project build"
         return
     }
 
+    if (log.isDebugEnabled()) {
+        cmd += " -debug"
+    }
     stage(ObjectUtil.safeValue(stageName, _stageName), ObjectUtil.safeValue(containerName, _containerName)) {
-        closure.call()
+        sh cmd
     }
 }
 
