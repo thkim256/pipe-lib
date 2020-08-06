@@ -266,7 +266,7 @@ def stageSourceBuild(def stageName = "", def containerName = "") {
     }
 }
 
-def stageMultiArchiveDockerBuild(def stageName = "MultiArchive Docker Build", def containerName = "docker") {
+def stageMultiArchiveDockerBuild(def stageName = "MultiArchive Docker Build", def containerName = "kaniko") {
     stageDockerBuild(stageName, containerName, [archiveMoveClosure: {
         if (log.isDebugEnabled() && this.originConfig.source.type != "UPLOAD") {
             log.debug "user input 'source contextPath' ignored"
@@ -278,7 +278,7 @@ find $WORKSPACE -name '*.ear' -type f -exec mv {} $WORKSPACE/docker/deployment \
     }])
 }
 
-def stageDockerBuild(def stageName = "Docker Build", def containerName = "docker", def option = [:]) {
+def stageDockerBuild(def stageName = "Docker Build", def containerName = "kaniko", def option = [:]) {
     log.info "call"
 
     stage(stageName, containerName) {
@@ -398,21 +398,24 @@ ls -al docker/deployment/lib/
             writeFile file: "${dockerfilePath}/Dockerfile", text: dockerfile
         }
 
-        sh "docker build --label accordions.io/creator --label accordions.io/tag=${image.tag} -t ${image.name}:${image.tag} ${dockerfilePath}"
-        if (log.isDebugEnabled()) {
-            try {
-                log.debug "docker inspect..."
-                sh "docker inspect ${image.name}:${image.tag}"
-            } catch (ignored) {
-            }
-        }
+        log.info "kaniko use docker build skip"
+
+        //sh "docker build --label accordions.io/creator --label accordions.io/tag=${image.tag} -t ${image.name}:${image.tag} ${dockerfilePath}"
+        //if (log.isDebugEnabled()) {
+            //try {
+                //log.debug "docker inspect..."
+                //sh "docker inspect ${image.name}:${image.tag}"
+            //} catch (ignored) {
+            //}
+        //}
     }
 }
 
-def stageDockerPush(def stageName = "Docker Push", def containerName = "docker") {
+def stageDockerPush(def stageName = "Docker Push", def containerName = "kaniko") {
     log.info "call"
 
     stage(stageName, containerName) {
+        def deploy = this.originConfig.deploy
         def image = this.originConfig.image
         if (ObjectUtil.empty(image.name) ||
                 ObjectUtil.empty(image.tag)) {
@@ -426,8 +429,13 @@ def stageDockerPush(def stageName = "Docker Push", def containerName = "docker")
             throw new Exception(msg)
         }
 
-        sh "set +x; docker login ${originRegistry.host} -u=${ObjectUtil.safeValue(originRegistry.username)} -p=${ObjectUtil.safeValue(originRegistry.password)}"
-        sh "docker push ${image.name}:${image.tag}"
+        def wasType = deploy.type == "TOMCAT" || deploy.type == "WILDFLY"
+        def dockerfilePath = wasType ? './docker' : './'
+
+sh """
+echo "{\"auths\":{\"${originRegistry.host}/\":{\"auth\":\"`echo -n ${ObjectUtil.safeValue(originRegistry.username)}:${ObjectUtil.safeValue(originRegistry.password)} | base64`\"}}}" > /kaniko/.docker/config.json
+executor --insecure --skip-tls-verify --context=dir://`pwd` --dockerfile=`pwd`/${dockerfilePath} --destination=${image.name}:${image.tag}
+"""
     }
 }
 
