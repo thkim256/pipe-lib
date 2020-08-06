@@ -206,7 +206,7 @@ def stageGetSource(def stageName = "Get Source", def containerName = "") {
                     sh "rm -rf ${source.file}"
                     sh "ls -al"
                 }
-            } else if (ObjectUtil.isFileType(source.file, 'war')) {
+            } else if (ObjectUtil.isFileType(source.file, 'war') || ObjectUtil.isFileType(source.file, 'ear')) {
                 closure = {
                     sh "${downloadShell}"
                 }
