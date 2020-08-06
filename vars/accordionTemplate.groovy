@@ -435,7 +435,7 @@ def stageDockerPush(def stageName = "Docker Push", def containerName = "kaniko")
 sh """
 set +x;
 echo \"{\\\"auths\\\":{\\\"${originRegistry.host}/\\\":{\\\"auth\\\":\\\"`echo -n ${ObjectUtil.safeValue(originRegistry.username)}:${ObjectUtil.safeValue(originRegistry.password)} | base64`\\\"}}}\" > /kaniko/.docker/config.json
-executor --insecure --skip-tls-verify --context=dir://`pwd` --dockerfile=${dockerfilePath}/Dockerfile --destination=${image.name}:${image.tag}
+executor --insecure --skip-tls-verify --context=dir://${dockerfilePath} --dockerfile=${dockerfilePath}/Dockerfile --destination=${image.name}:${image.tag}
 """
     }
 }
