@@ -46,7 +46,7 @@ spec:
       command:
         - cat
     - name: kaniko
-      image: gcr.io/kaniko-project/executor:debug-v0.24.0
+      image: gcr.io/kaniko-project/executor:debug-v0.17.0
       tty: true
       command:
         - cat
